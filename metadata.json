@@ -1,0 +1,6 @@
+{
+  "name": "VeritasAcademic",
+  "description": "Enterprise academic integrity platform providing intelligent plagiarism detection, AI-generated content analysis, institutional workspaces, and verifiable similarity reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

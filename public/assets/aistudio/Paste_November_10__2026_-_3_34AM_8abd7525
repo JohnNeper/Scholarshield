@@ -1,0 +1,1203 @@
+# MASTER BUILD PROMPT — PREMIUM ACADEMIC INTEGRITY SAAS PLATFORM
+
+## 1. ROLE AND MISSION
+
+Act as a world-class SaaS product architect, senior full-stack engineer, UX/UI designer, AI engineer, database architect, and cybersecurity specialist.
+
+Your mission is to design and build a complete, production-oriented SaaS platform for academic integrity verification.
+
+The platform must provide two independent but integrated analysis capabilities:
+
+1. **Academic Plagiarism Detection:** Detect textual similarities, direct copying, paraphrasing, and similarities with accessible reference sources and authorized institutional document collections.
+2. **AI-Generated Content Detection:** Analyze academic documents to identify passages whose linguistic characteristics are statistically associated with AI-generated content.
+
+The product should deliver a premium user experience inspired by the usability of Linear, the dashboard quality of Stripe, and the academic analysis experience of Turnitin and Copyleaks.
+
+IMPORTANT: Do not build only a landing page or a static dashboard. Build a complete multi-page SaaS application with real navigation, reusable components, functional interactions, authentication architecture, database integration, role-based permissions, and all major user workflows.
+
+The application must be scalable, modular, secure, multilingual, and ready for future integration of proprietary AI detection engines.
+
+---
+
+# 2. PRODUCT VISION
+
+Working product name: Academic Integrity Platform.
+
+Do not permanently impose a brand name. Use a configurable placeholder brand identity.
+
+Product positioning: Premium B2C and B2B SaaS.
+
+Target markets:
+- University students.
+- Master's and PhD students.
+- Lecturers and professors.
+- Academic researchers.
+- Universities.
+- Higher education institutions.
+- Research centers.
+- Academic organizations.
+
+Primary languages:
+- French.
+- English.
+
+The architecture must support additional languages.
+
+The platform should allow an individual student to analyze a thesis in a few clicks while also allowing a university to manage thousands of students and academic submissions.
+
+---
+
+# 3. DESIGN DIRECTION AND VISUAL IDENTITY
+
+Create an exceptional premium SaaS design.
+
+Visual direction:
+- Minimalist.
+- Elegant.
+- Academic.
+- Modern.
+- Professional.
+- Technology-oriented.
+- Spacious and highly readable.
+
+Color palette:
+
+- Deep Navy: #14243A
+- Academic Blue: #3978D5
+- Intelligence Purple: #8B68D8
+- Background: #F5F7FA
+- White: #FFFFFF
+- Main Text: #1B2638
+- Secondary Text: #758196
+- Border: #E7EBF1
+- Success: #269B72
+- Warning: #E9A23B
+- Error: #D95757
+
+Typography:
+- Inter for body text and interface.
+- Plus Jakarta Sans for headings.
+- JetBrains Mono for technical identifiers.
+
+Design rules:
+- Consistent spacing system.
+- Rounded cards (12–16px).
+- Subtle shadows.
+- Thin borders.
+- Clean icons using Lucide.
+- Elegant hover states.
+- Smooth transitions.
+- Responsive layouts.
+- Light mode and dark mode.
+- Accessible contrast.
+- Premium empty states and skeleton loaders.
+
+Avoid:
+- Excessive gradients.
+- Overloaded dashboards.
+- Too many colors.
+- Unnecessary animations.
+- Generic AI-generated website layouts.
+- Huge decorative illustrations.
+- Inconsistent components.
+
+Use a persistent sidebar for authenticated desktop workspaces.
+
+On mobile, replace the sidebar with a responsive navigation drawer or compact navigation system.
+
+---
+
+# 4. APPLICATION ARCHITECTURE
+
+Build four distinct application environments.
+
+A. PUBLIC WEBSITE
+B. PERSONAL USER WORKSPACE
+C. INSTITUTIONAL WORKSPACE
+D. SUPER ADMIN WORKSPACE
+
+All environments must share the same design system but have different navigation, permissions, and business logic.
+
+---
+
+# 5. PUBLIC WEBSITE — ALL PAGES
+
+Build the following public routes:
+
+## 5.1 Homepage — /
+
+Create a premium SaaS landing page containing:
+
+- Navigation bar.
+- Configurable logo.
+- Features.
+- Solutions.
+- Pricing.
+- Resources.
+- Contact.
+- Login button.
+- Get Started CTA.
+
+Hero section:
+
+Headline:
+"Academic Integrity, Powered by Intelligent Analysis."
+
+Subtitle:
+"Analyze academic documents, identify textual similarities, and evaluate AI-generated content with a powerful multilingual academic integrity platform."
+
+Primary CTA:
+"Start Your Analysis"
+
+Secondary CTA:
+"Explore Features"
+
+Include:
+- Product dashboard preview.
+- Plagiarism detection presentation.
+- AI detection presentation.
+- How it works.
+- Benefits for students.
+- Benefits for universities.
+- Research and academic use cases.
+- Security and confidentiality section.
+- Pricing preview.
+- Testimonials using clearly identified placeholder content.
+- FAQ.
+- Footer.
+
+## 5.2 Features — /features
+
+Dedicated feature sections for:
+- Plagiarism Detection.
+- AI Content Detection.
+- Document Analysis.
+- Source Comparison.
+- Detailed Reports.
+- Institutional Workspaces.
+- Multilingual Analysis.
+- Secure Document Management.
+
+## 5.3 Solutions — /solutions
+
+Create dedicated solution pages for:
+- Students.
+- Teachers.
+- Researchers.
+- Universities.
+- Research Institutions.
+
+## 5.4 Pricing — /pricing
+
+Create four configurable subscription plans:
+
+FREE:
+- Limited analyses.
+- Basic reports.
+- Limited document size.
+
+STUDENT:
+- Individual academic analysis.
+- Similarity reports.
+- AI detection.
+- PDF exports.
+
+PROFESSIONAL:
+- Higher quotas.
+- Advanced reports.
+- Document history.
+- Priority processing.
+
+INSTITUTION:
+- Multiple users.
+- Departments.
+- Classes.
+- Centralized administration.
+- Institutional analytics.
+- Bulk document submission.
+
+All prices, quotas, and features must be configurable through the administration system.
+
+Do not invent payment confirmations.
+
+## 5.5 Additional Public Pages
+
+- /resources
+- /contact
+- /privacy
+- /terms
+- /security
+- /data-policy
+
+---
+
+# 6. AUTHENTICATION AND ONBOARDING
+
+Create the following pages:
+
+- /signup
+- /login
+- /forgot-password
+- /verify-email
+- /onboarding/role
+- /onboarding/profile
+- /onboarding/preferences
+- /onboarding/complete
+
+Authentication features:
+- Email and password.
+- Secure password reset.
+- Email verification.
+- Optional Google authentication if supported.
+- Session management.
+- Protected routes.
+- Role-based redirects.
+
+During onboarding, ask the user to choose:
+
+1. Student.
+2. Teacher.
+3. Researcher.
+4. Institution Administrator.
+
+Collect:
+- Full name.
+- Email.
+- Country.
+- Preferred language.
+- Academic institution (optional).
+- Academic field (optional).
+
+Keep onboarding short and allow users to skip nonessential fields.
+
+---
+
+# 7. PERSONAL USER WORKSPACE
+
+Base route: /app
+
+Create a professional SaaS sidebar with:
+
+- Dashboard.
+- New Analysis.
+- My Documents.
+- Analysis History.
+- Reports.
+- Collections.
+- Usage & Credits.
+- Settings.
+
+## 7.1 Dashboard — /app/dashboard
+
+Create an interactive dashboard.
+
+Display:
+- Personalized greeting.
+- Subscription plan.
+- Remaining credits.
+- Total documents analyzed.
+- Completed reports.
+- Average similarity indicator.
+- Recent activity.
+- Recent documents.
+- Analysis status.
+- Quick actions.
+
+Main CTA:
+"Analyze a New Document"
+
+Include useful empty states for new users.
+
+## 7.2 New Analysis — /app/analysis/new
+
+This is one of the most important screens.
+
+Create a beautiful drag-and-drop upload interface.
+
+Supported formats:
+- PDF.
+- DOCX.
+- TXT.
+
+Features:
+- Drag and drop.
+- Browse files.
+- Multiple file selection where supported.
+- File validation.
+- File size validation.
+- Upload progress.
+- File preview.
+- Document information.
+- Remove or replace document.
+
+Show a clear summary of the uploaded document.
+
+## 7.3 Analysis Configuration — /app/analysis/:id/configure
+
+Allow users to configure their analysis.
+
+Analysis types:
+
+A. Plagiarism Detection Only.
+
+B. AI Detection Only.
+
+C. Complete Analysis — Both engines.
+
+Configuration:
+- Document type.
+- Language.
+- Academic field.
+- Citation handling.
+- Bibliography handling.
+- Comparison database.
+- Institutional corpus access where authorized.
+
+Display:
+- Estimated processing information.
+- Credit consumption.
+- Analysis summary.
+- Confirmation checkbox for document-processing terms.
+
+Main button:
+"Start Analysis"
+
+## 7.4 Analysis Processing — /app/analysis/:id/processing
+
+Create a premium processing screen.
+
+Display real backend job statuses:
+
+1. Document upload.
+2. Text extraction.
+3. Document preprocessing.
+4. Similarity analysis.
+5. AI content analysis.
+6. Report generation.
+
+Use actual job progress when available.
+
+Do not fabricate processing progress or completion percentages.
+
+Allow users to leave the page and retrieve their analysis later.
+
+## 7.5 Results Overview — /app/analysis/:id/results
+
+Build a premium results dashboard.
+
+Display two completely separate result cards.
+
+CARD 1 — SIMILARITY REPORT
+
+- Similarity percentage.
+- Number of matched passages.
+- Number of identified sources.
+- Coverage information.
+- Link to detailed similarity report.
+
+CARD 2 — AI CONTENT ANALYSIS
+
+- AI-associated content indicator.
+- Number of flagged passages.
+- Confidence information.
+- Analyzed text coverage.
+- Link to detailed AI report.
+
+Include:
+- Document information.
+- Analysis date.
+- Engine version.
+- Analysis status.
+- Download PDF.
+- View Detailed Report.
+
+Clearly communicate that similarity is not equivalent to plagiarism and AI detection is not definitive proof of AI usage.
+
+## 7.6 Similarity Report — /app/analysis/:id/similarity
+
+Create an advanced document comparison interface.
+
+Layout:
+
+LEFT PANEL:
+- Source list.
+- Source names.
+- Source categories.
+- Similarity values.
+- Filters.
+- Navigation between matched passages.
+
+CENTER PANEL:
+- Original document viewer.
+- Highlighted matching passages.
+- Page navigation.
+- Zoom.
+- Search within document.
+
+RIGHT PANEL:
+- Selected passage.
+- Matching source.
+- Original text.
+- Matching text.
+- Similarity explanation.
+- Source reference.
+- Open source action.
+
+Use a consistent color system:
+- Red for strong textual matches.
+- Orange for partial similarities.
+- Neutral colors for citations and excluded passages.
+
+Never label every match as plagiarism.
+
+## 7.7 AI Detection Report — /app/analysis/:id/ai-detection
+
+Create a dedicated AI detection report.
+
+Include:
+- Overall AI-associated content indicator.
+- Passage-level analysis.
+- Highlighted document sections.
+- Model confidence where calibrated.
+- Linguistic indicators.
+- Explanations.
+- Analysis coverage.
+- Uncertain or inconclusive passages.
+- Model limitations.
+
+Purple is the primary highlighting color for AI-associated passages.
+
+IMPORTANT:
+Never claim that a flagged passage proves that a student used ChatGPT or another AI tool.
+
+Do not invent model confidence or real detection results.
+
+## 7.8 Document Viewer — /app/documents/:id
+
+Features:
+- PDF/DOCX document viewing.
+- Pagination.
+- Zoom.
+- Search.
+- Annotations.
+- Highlight navigation.
+- Download.
+- Document information.
+
+## 7.9 Reports Center — /app/reports
+
+Create a searchable reports library.
+
+Columns:
+- Document.
+- Analysis type.
+- Similarity.
+- AI indicator.
+- Date.
+- Status.
+- Actions.
+
+Filters:
+- Date.
+- Status.
+- Analysis type.
+- Document type.
+
+## 7.10 My Documents — /app/documents
+
+Create a document management interface.
+
+Features:
+- Grid/list view.
+- Search.
+- Folders.
+- Collections.
+- Tags.
+- Sorting.
+- Upload.
+- Download.
+- Archive.
+- Delete.
+
+## 7.11 Analysis History — /app/history
+
+Display all past analyses with:
+- Search.
+- Filters.
+- Dates.
+- Status.
+- Document name.
+- Reanalysis action where supported.
+
+## 7.12 Collections — /app/collections
+
+Allow users to organize documents by:
+- Thesis.
+- Research project.
+- Academic year.
+- Course.
+- Personal projects.
+
+## 7.13 Usage & Credits — /app/usage
+
+Display:
+- Current plan.
+- Available credits.
+- Used credits.
+- Usage history.
+- Consumption breakdown.
+- Upgrade plan CTA.
+
+All credit rules must be configurable.
+
+---
+
+# 8. INSTITUTIONAL WORKSPACE
+
+Base route: /institution
+
+Create a separate institutional interface.
+
+Navigation:
+- Overview.
+- Departments.
+- Classes.
+- Students.
+- Submissions.
+- Assignments.
+- Team.
+- Analytics.
+- Settings.
+
+Pages:
+
+/institution/dashboard
+/institution/departments
+/institution/classes
+/institution/students
+/institution/submissions
+/institution/assignments
+/institution/team
+/institution/analytics
+/institution/settings
+
+## Institutional Features
+
+INSTITUTION DASHBOARD:
+- Total students.
+- Total teachers.
+- Total analyses.
+- Active departments.
+- Pending submissions.
+- Completed analyses.
+- Usage analytics.
+
+DEPARTMENTS:
+- Create department.
+- Edit department.
+- Assign department administrator.
+- View related classes.
+
+CLASSES:
+- Create academic classes.
+- Assign teachers.
+- Manage academic years.
+- Generate invitation codes.
+
+STUDENTS:
+- Invite students.
+- Import CSV.
+- Manage profiles.
+- Assign students to classes.
+
+SUBMISSIONS:
+- View submitted documents.
+- Check processing status.
+- View available analysis reports.
+- Export reports.
+
+ASSIGNMENTS:
+- Create academic assignments.
+- Set deadlines.
+- Define accepted file formats.
+- Configure analysis requirements.
+- Collect student submissions.
+
+TEAM:
+- Invite teachers.
+- Assign roles.
+- Manage permissions.
+
+ANALYTICS:
+- Analysis statistics.
+- Similarity distribution.
+- AI detection indicators.
+- Department-level activity.
+- Usage reports.
+
+Institutional data must be strictly isolated from other organizations.
+
+---
+
+# 9. ACCOUNT, BILLING AND SETTINGS
+
+Create:
+
+/app/settings/profile
+/app/settings/preferences
+/app/settings/security
+/app/settings/billing
+/app/settings/notifications
+/app/settings/sessions
+
+Features:
+- Update profile.
+- Change language.
+- Change theme.
+- Update password.
+- Enable MFA where supported.
+- View active sessions.
+- Manage subscription.
+- View invoices.
+- Manage payment methods.
+- Configure notifications.
+- Request account deletion.
+
+---
+
+# 10. SUPER ADMIN WORKSPACE
+
+Base route: /admin
+
+Create a completely separate administration dashboard.
+
+Pages:
+
+/admin/dashboard
+/admin/users
+/admin/institutions
+/admin/subscriptions
+/admin/transactions
+/admin/engines
+/admin/analysis-jobs
+/admin/audit-logs
+/admin/settings
+
+ADMIN DASHBOARD:
+- Total registered users.
+- Active users.
+- Total institutions.
+- Total analyses.
+- Monthly recurring revenue.
+- Subscription statistics.
+- Processing jobs.
+- Failed jobs.
+
+USER MANAGEMENT:
+- Search users.
+- View user profiles.
+- Manage roles.
+- Suspend or reactivate accounts.
+- View account activity.
+
+INSTITUTION MANAGEMENT:
+- View organizations.
+- Manage licenses.
+- Manage institution administrators.
+
+SUBSCRIPTIONS:
+- Configure pricing plans.
+- Configure quotas.
+- Manage subscription status.
+- Review payments.
+
+ENGINE MONITORING:
+- Plagiarism engine status.
+- AI detection engine status.
+- API health.
+- Processing queues.
+- Error monitoring.
+- Model versions.
+- Engine performance.
+
+AUDIT LOGS:
+- Authentication events.
+- User activities.
+- Administrative actions.
+- Document operations.
+- Permission changes.
+
+All administrative actions must be auditable.
+
+---
+
+# 11. CORE AI AND PLAGIARISM ENGINE ARCHITECTURE
+
+The platform must be designed around two independent analysis services.
+
+Do not hardcode the AI engines into frontend components.
+
+Use modular APIs and service adapters.
+
+## ENGINE 1 — PLAGIARISM DETECTION
+
+Prepare an integration layer supporting:
+
+- Text extraction.
+- Text normalization.
+- Sentence segmentation.
+- N-gram comparison.
+- Winnowing.
+- MinHash.
+- Semantic similarity.
+- Embedding-based retrieval.
+- Cross-encoder reranking.
+- Source identification.
+- Passage alignment.
+- Citation detection.
+- Institutional corpus comparison.
+
+Potential technologies:
+- Python.
+- FastAPI.
+- PostgreSQL.
+- OpenSearch.
+- Redis.
+- Vector database.
+
+The engine must return structured results containing:
+- Similarity score.
+- Matched passages.
+- Source references.
+- Source metadata.
+- Match type.
+- Text offsets.
+- Confidence or matching evidence.
+
+Do not present inaccessible web pages as verified sources.
+
+## ENGINE 2 — AI-GENERATED CONTENT DETECTION
+
+Prepare an independent multilingual detection service.
+
+Architecture should support:
+- XLM-RoBERTa.
+- Transformer-based classification.
+- Token-level classification.
+- Linguistic feature extraction.
+- Stylometric features.
+- Ensemble classification.
+- Probability calibration.
+- Language-specific evaluation.
+- Human-written versus AI-generated training data.
+
+The service must return:
+- Document-level indicator.
+- Passage-level indicators.
+- Confidence information where validated.
+- Analysis coverage.
+- Model version.
+- Language.
+- Inconclusive segments.
+- Technical explanations.
+
+Do not pretend that a trained model exists if it has not been connected.
+
+## ENGINE ADAPTER PATTERN
+
+Implement independent interfaces:
+
+PlagiarismEngineAdapter:
+- analyze(document)
+- getStatus()
+- getVersion()
+
+AIDetectionEngineAdapter:
+- analyze(document)
+- getStatus()
+- getVersion()
+
+Support:
+- Demo implementation.
+- External API implementation.
+- Future proprietary model implementation.
+
+Make it possible to replace either engine without rebuilding the frontend.
+
+---
+
+# 12. DEMONSTRATION MODE
+
+The platform must be usable before real detection models are connected.
+
+Implement a clearly labeled DEMO MODE.
+
+Demo mode must provide:
+- Sample academic documents.
+- Sample similarity reports.
+- Sample AI detection reports.
+- Sample institutional users.
+- Sample analytics.
+- Example processing workflows.
+
+All demonstration data must be explicitly labeled as simulated.
+
+NEVER present simulated results as real document analysis.
+
+When no engine is connected, show:
+"Analysis engine is not connected. This is a demonstration environment."
+
+Do not use fake AI APIs or invented plagiarism results.
+
+---
+
+# 13. DATABASE ARCHITECTURE
+
+Use a relational database with a clean and scalable schema.
+
+Suggested entities:
+
+- users
+- profiles
+- organizations
+- organization_members
+- departments
+- classes
+- class_members
+- assignments
+- submissions
+- documents
+- document_versions
+- analysis_jobs
+- analysis_results
+- plagiarism_results
+- similarity_matches
+- source_references
+- ai_detection_results
+- flagged_passages
+- reports
+- collections
+- collection_documents
+- subscriptions
+- subscription_plans
+- credit_transactions
+- payments
+- notifications
+- audit_logs
+- engine_versions
+
+Requirements:
+- UUID identifiers.
+- Created and updated timestamps.
+- Foreign key relationships.
+- Database indexes.
+- Tenant isolation.
+- Role-based access control.
+- Row-level security where supported.
+- Secure document storage.
+- Soft deletion where appropriate.
+
+Never store uploaded document contents directly in ordinary frontend state or expose private storage URLs publicly.
+
+---
+
+# 14. TECHNICAL STACK
+
+Preferred frontend:
+- React.
+- TypeScript.
+- Tailwind CSS.
+- shadcn/ui.
+- Lucide icons.
+- React Router or an appropriate routing framework.
+- React Query or equivalent data-fetching library.
+
+Preferred backend:
+- Python.
+- FastAPI.
+- REST APIs.
+- Background job processing.
+- Redis.
+
+Database:
+- PostgreSQL.
+- Supabase may be used for authentication, database, and storage if supported by the development environment.
+
+Document storage:
+- Private object storage.
+- Signed access URLs.
+- Encryption.
+
+Processing:
+- Asynchronous queues.
+- Job status tracking.
+- Retry mechanisms.
+- Error handling.
+
+Use environment variables for all secrets and external services.
+
+Do not expose API keys in frontend code.
+
+If working in Lovable, use its supported React and Supabase integration.
+
+If working in Google AI Studio, generate the equivalent full-stack application using the available environment and clearly separate frontend, backend, and model integrations.
+
+Do not claim that an external service has been connected unless the connection has actually been configured and tested.
+
+---
+
+# 15. SECURITY AND PRIVACY
+
+Implement:
+- Authentication.
+- Role-based authorization.
+- Tenant isolation.
+- Secure file uploads.
+- MIME type validation.
+- File size restrictions.
+- Malware scanning integration point.
+- Rate limiting.
+- Secure API validation.
+- Audit logging.
+- Private storage.
+- Signed URLs.
+- Data retention settings.
+- Document deletion.
+- User data export.
+- Account deletion.
+- Protection against unauthorized document access.
+
+Uploaded academic documents must not be used to train AI models without explicit consent.
+
+Institutional documents must never become visible to other institutions.
+
+---
+
+# 16. MULTILINGUAL EXPERIENCE
+
+Implement internationalization from the beginning.
+
+Languages:
+- French.
+- English.
+
+Add a language selector.
+
+All interface labels, menus, buttons, notifications, errors, empty states, and reports must support translation.
+
+Use translation files rather than hardcoding text in components.
+
+Default language: English.
+
+Allow users to change their preferred language.
+
+---
+
+# 17. FUNCTIONALITY REQUIREMENTS
+
+Every visible interactive element must work.
+
+Implement:
+- Working navigation.
+- Working forms.
+- Form validation.
+- Search.
+- Filtering.
+- Sorting.
+- Pagination.
+- Dialogs.
+- Dropdowns.
+- Tabs.
+- Upload interactions.
+- Document management.
+- Report navigation.
+- Role-based dashboards.
+- Notifications.
+- Theme switching.
+- Language switching.
+- Responsive menus.
+
+Do not create buttons that look functional but do nothing.
+
+For unavailable backend capabilities, show an explicit integration status instead of pretending the action succeeded.
+
+---
+
+# 18. UX QUALITY AND EDGE CASES
+
+Every major page must support:
+
+- Loading states.
+- Empty states.
+- Success states.
+- Error states.
+- Permission errors.
+- Network errors.
+- Unsupported documents.
+- Processing failures.
+- Insufficient credits.
+- Inconclusive analysis.
+- Session expiration.
+
+The interface must remain intuitive for users with limited technical knowledge.
+
+Use clear language and contextual explanations.
+
+---
+
+# 19. RESPONSIVE DESIGN
+
+Desktop:
+- Full sidebar.
+- Multi-column dashboards.
+- Advanced document viewer.
+- Detailed analytics.
+
+Tablet:
+- Collapsible sidebar.
+- Responsive cards.
+- Adapted document viewer.
+
+Mobile:
+- Compact navigation.
+- Stacked cards.
+- Simplified charts.
+- Touch-friendly controls.
+- Mobile file picker.
+- Readable reports.
+
+All major routes must work on mobile.
+
+---
+
+# 20. DEVELOPMENT AND DELIVERY STRATEGY
+
+Do not try to generate everything as a single unstructured page.
+
+Work progressively while preserving the complete architecture.
+
+PHASE 1 — FOUNDATION
+- Project structure.
+- Design system.
+- Routing.
+- Authentication.
+- Global navigation.
+- Responsive layouts.
+
+PHASE 2 — PUBLIC WEBSITE
+- Landing page.
+- Features.
+- Solutions.
+- Pricing.
+- Contact.
+- Legal pages.
+
+PHASE 3 — PERSONAL WORKSPACE
+- Dashboard.
+- Document upload.
+- Analysis configuration.
+- Processing.
+- Results overview.
+- Similarity report.
+- AI detection report.
+- Document viewer.
+- Reports.
+- History.
+- Collections.
+- Credits.
+
+PHASE 4 — INSTITUTIONAL WORKSPACE
+- Organization dashboard.
+- Departments.
+- Classes.
+- Students.
+- Submissions.
+- Assignments.
+- Team.
+- Analytics.
+
+PHASE 5 — SUPER ADMIN
+- Users.
+- Institutions.
+- Subscriptions.
+- Transactions.
+- Engines.
+- Jobs.
+- Audit logs.
+
+PHASE 6 — BACKEND AND INTEGRATIONS
+- Database.
+- Storage.
+- APIs.
+- Authentication integration.
+- Background processing.
+- Engine adapters.
+- Payment integration.
+
+PHASE 7 — QUALITY ASSURANCE
+- Test all routes.
+- Test user journeys.
+- Test authorization.
+- Test mobile responsiveness.
+- Test forms.
+- Test upload validation.
+- Test empty and error states.
+- Fix broken interactions.
+- Verify that no simulated result is presented as real.
+
+---
+
+# 21. FINAL ACCEPTANCE CRITERIA
+
+The project is not complete until:
+
+1. All specified routes exist.
+2. The public website is fully designed.
+3. Authentication screens are functional.
+4. Personal dashboards are implemented.
+5. Institutional interfaces are implemented.
+6. Super Admin interfaces are implemented.
+7. All navigation works.
+8. The main analysis workflow is implemented.
+9. Plagiarism and AI results have separate interfaces.
+10. Demo mode is clearly distinguished from real analysis.
+11. The database architecture is established.
+12. User permissions are enforced.
+13. Responsive design works.
+14. The French and English interfaces are available.
+15. All major buttons and forms have meaningful behavior.
+16. There are no broken links or placeholder buttons presented as completed features.
+
+---
+
+# 22. FINAL PRODUCT QUALITY EXPECTATION
+
+Think like a company building a serious international academic technology product.
+
+The final experience must feel like a mature, premium, trustworthy SaaS platform rather than a generic AI-generated website.
+
+Prioritize:
+- Exceptional UX.
+- Consistent visual identity.
+- Clear navigation.
+- Reliable document management.
+- Transparent analysis results.
+- Strong privacy.
+- Modular architecture.
+- Scalability.
+- Maintainable code.
+
+Do not simplify the product by silently removing requested modules.
+
+Do not stop after building the homepage.
+
+Start by establishing the complete project architecture and design system, then build the application module by module.
+
+Before finishing, provide:
+- A list of implemented routes.
+- A list of functional features.
+- A list of backend integrations.
+- A list of features still requiring external services.
+- A list of known limitations.
+
+**Build a complete, coherent, premium academic integrity SaaS platform.**
