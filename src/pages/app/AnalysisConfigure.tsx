@@ -28,13 +28,14 @@ interface AnalysisConfigureProps {
 }
 
 export const AnalysisConfigure: React.FC<AnalysisConfigureProps> = ({ documentId, onNavigate }) => {
-  const { getDocument, startAnalysisJob, customSources, addCustomSource, deleteCustomSource } = useData();
+  const { getDocument, startAnalysisJob, customSources, addCustomSource, deleteCustomSource, collections, documents } = useData();
   const { user } = useAuth();
   const doc = getDocument(documentId);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [analysisType, setAnalysisType] = useState<AnalysisType>('both');
   const [corpusMode, setCorpusMode] = useState<'standard' | 'custom'>('standard');
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [selectedSourceIds, setSelectedSourceIds] = useState<string[]>(
     customSources.map((s) => s.id)
   );
@@ -150,6 +151,7 @@ export const AnalysisConfigure: React.FC<AnalysisConfigureProps> = ({ documentId
         excludeBibliography,
         institutionalCorpus,
         customSources: activeCustomSources,
+        referenceCollectionId: selectedCollectionId || undefined,
       });
       onNavigate(`/app/analysis/${job.id}/processing`);
     } catch (err: any) {
@@ -518,6 +520,95 @@ export const AnalysisConfigure: React.FC<AnalysisConfigureProps> = ({ documentId
             </div>
           </div>
         )}
+
+        {/* Collection Mixed Comparison Selector */}
+        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div className="flex items-center gap-2">
+                <FolderPlus className="w-4 h-4 text-[#3978D5]" />
+                <span className="text-xs font-bold text-slate-900 dark:text-white">
+                  Croiser avec l'une de mes Collections (Comparaison Mixte)
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-blue-100 text-[#3978D5] dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
+                  RECOMMANDÉ
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Sélectionnez une collection : les documents qu'elle contient seront intégrés comme corpus prioritaire en plus des revues mondiales et des dépôts universitaires locaux.
+              </p>
+            </div>
+            {selectedCollectionId && (
+              <button
+                type="button"
+                onClick={() => setSelectedCollectionId(null)}
+                className="text-[11px] text-slate-400 hover:text-slate-600 underline shrink-0"
+              >
+                Désélectionner la collection
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <button
+              type="button"
+              onClick={() => setSelectedCollectionId(null)}
+              className={`p-3 rounded-xl border text-left transition-all ${
+                selectedCollectionId === null
+                  ? 'border-[#3978D5] bg-blue-50/50 dark:bg-blue-950/20 ring-1 ring-[#3978D5]'
+                  : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
+              }`}
+            >
+              <span className="text-xs font-bold text-slate-900 dark:text-white block">
+                Aucune collection spécifique
+              </span>
+              <span className="text-[10px] text-slate-400 mt-0.5 block">
+                Corpus académique global et local standard
+              </span>
+            </button>
+
+            {collections.map((col) => {
+              const colDocs = documents.filter((d) => d.collectionId === col.id && d.id !== doc.id);
+              const isSelected = selectedCollectionId === col.id;
+              return (
+                <button
+                  key={col.id}
+                  type="button"
+                  onClick={() => setSelectedCollectionId(col.id)}
+                  className={`p-3 rounded-xl border text-left transition-all ${
+                    isSelected
+                      ? 'border-[#3978D5] bg-blue-50/50 dark:bg-blue-950/20 ring-1 ring-[#3978D5]'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                      {col.title}
+                    </span>
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: col.color || '#3978D5' }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-slate-500 font-mono block">
+                    {colDocs.length} doc{colDocs.length > 1 ? 's' : ''} de référence lié{colDocs.length > 1 ? 's' : ''}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedCollectionId && (
+            <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 rounded-xl text-xs text-emerald-900 dark:text-emerald-300 flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>
+                  <strong>Comparaison mixte activée</strong> : Les documents de la collection sélectionnée seront comparés simultanément avec le Web et les thèses universitaires (UDs, UBa, CAMES).
+                </span>
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 3. Advanced Exclusion Filters & Citation Handling */}

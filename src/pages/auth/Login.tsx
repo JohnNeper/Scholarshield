@@ -150,6 +150,44 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, redirectPath }) => {
           </div>
         )}
 
+        {/* Dedicated Admin Portal Banner with Credentials */}
+        <div className="p-3.5 bg-gradient-to-br from-indigo-50/80 via-blue-50/50 to-slate-50 dark:from-indigo-950/30 dark:via-blue-950/20 dark:to-slate-900/40 border border-indigo-200/80 dark:border-indigo-800/50 rounded-2xl space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900 dark:text-indigo-200">
+              <Shield className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <span>Accès Super Admin & Validation Institutions</span>
+            </div>
+            <span className="px-2 py-0.5 text-[10px] font-mono font-semibold bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded">
+              ADMIN OPÉRATIONS
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+            Identifiants pour valider les institutions en attente et piloter l’ensemble des campus :
+          </p>
+          <div className="p-2 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-indigo-100 dark:border-indigo-900/50 text-[11px] font-mono space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Email :</span>
+              <span className="font-semibold text-indigo-700 dark:text-indigo-300 select-all">admin.ops@scholarshield.cm</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Mot de passe :</span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200 select-all">password123</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setEmail('admin.ops@scholarshield.cm');
+              setPassword('password123');
+              setError('');
+            }}
+            className="w-full py-2 text-[11px] font-bold text-indigo-700 dark:text-indigo-200 bg-indigo-100/70 hover:bg-indigo-200/80 dark:bg-indigo-900/40 dark:hover:bg-indigo-900/70 rounded-xl transition-all flex items-center justify-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Remplir les identifiants Super Admin en 1 clic</span>
+          </button>
+        </div>
+
         {/* Clean Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -259,6 +297,17 @@ export const Login: React.FC<LoginProps> = ({ onNavigate, redirectPath }) => {
                 {isFr ? 'Sélectionnez un profil pour renseigner les accès de test :' : 'Select a profile to populate test credentials:'}
               </p>
               <div className="flex flex-col gap-1">
+                <button
+                  type="button"
+                  onClick={() => fillCredentials('admin.ops@scholarshield.cm')}
+                  className="p-1.5 text-left rounded-lg bg-indigo-50/60 dark:bg-indigo-950/40 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/60 flex items-center justify-between text-indigo-900 dark:text-indigo-200 border border-indigo-200/50 dark:border-indigo-800/40"
+                >
+                  <span className="font-bold flex items-center gap-1">
+                    <Shield className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                    <span>{isFr ? 'Super Admin Ops (Validation Institutions)' : 'Super Admin Ops (Institution Validation)'}</span>
+                  </span>
+                  <span className="text-[10px] text-indigo-700 dark:text-indigo-300 font-mono">admin.ops@scholarshield.cm</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => fillCredentials('amina.njoya@univ-dschang.org')}

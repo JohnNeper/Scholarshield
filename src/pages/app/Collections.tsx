@@ -21,6 +21,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { AcademicCollection, AcademicDocument } from '../../types';
+import { decodeDocumentFile, cleanGarbledPdfArtifacts } from '../../services/utils/documentDecoder';
 
 interface CollectionsProps {
   onNavigate: (path: string) => void;
@@ -31,6 +32,7 @@ export const Collections: React.FC<CollectionsProps> = ({ onNavigate }) => {
     collections,
     documents,
     jobs,
+    addDocument,
     addCollection,
     updateCollection,
     deleteCollection,
@@ -43,7 +45,18 @@ export const Collections: React.FC<CollectionsProps> = ({ onNavigate }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAddDocModal, setShowAddDocModal] = useState(false);
+  const [showDirectUploadModal, setShowDirectUploadModal] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
+
+  // Direct upload in collection state
+  const [uploadMode, setUploadMode] = useState<'file' | 'paste'>('file');
+  const [uploadTitle, setUploadTitle] = useState('');
+  const [uploadTags, setUploadTags] = useState('');
+  const [uploadPastedText, setUploadPastedText] = useState('');
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isDecodingFile, setIsDecodingFile] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [uploadSuccess, setUploadSuccess] = useState('');
 
   // New collection form state
   const [newTitle, setNewTitle] = useState('');
@@ -97,6 +110,82 @@ export const Collections: React.FC<CollectionsProps> = ({ onNavigate }) => {
     if (activeCollection && editDescValue.trim()) {
       updateCollection(activeCollection.id, { description: editDescValue.trim() });
       setIsEditingDescription(false);
+    }
+  };
+
+  const handleDirectFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadedFile(file);
+    if (!uploadTitle.trim()) {
+      setUploadTitle(file.name.replace(/\.[^/.]+$/, ''));
+    }
+    setUploadError('');
+  };
+
+  const handleExecuteDirectUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeCollection) return;
+
+    setUploadError('');
+    setIsDecodingFile(true);
+
+    try {
+      let finalContent = '';
+      let filename = 'document_texte.txt';
+      let mimeType = 'text/plain';
+      let fileSizeBytes = 1024;
+
+      if (uploadMode === 'file') {
+        if (!uploadedFile) {
+          throw new Error('Veuillez sélectionner un fichier académique (PDF, DOCX, TXT).');
+        }
+        const decoded = await decodeDocumentFile(uploadedFile);
+        finalContent = cleanGarbledPdfArtifacts(decoded.text);
+        filename = uploadedFile.name;
+        mimeType = uploadedFile.type || 'application/octet-stream';
+        fileSizeBytes = uploadedFile.size;
+      } else {
+        if (!uploadPastedText.trim() || uploadPastedText.trim().length < 20) {
+          throw new Error('Veuillez saisir ou coller un texte académique d\'au moins 20 caractères.');
+        }
+        finalContent = cleanGarbledPdfArtifacts(uploadPastedText.trim());
+        filename = `${(uploadTitle.trim() || 'manuscrit_direct').replace(/\s+/g, '_')}.txt`;
+        fileSizeBytes = finalContent.length;
+      }
+
+      const words = finalContent.trim().split(/\s+/).filter(Boolean).length;
+      const titleToUse = uploadTitle.trim() || filename.replace(/\.[^/.]+$/, '');
+      const tagList = uploadTags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      addDocument({
+        userId: user?.id || 'usr-student-01',
+        title: titleToUse,
+        filename,
+        fileSizeBytes,
+        wordCount: words,
+        mimeType,
+        content: finalContent,
+        collectionId: activeCollection.id,
+        tags: tagList.length > 0 ? tagList : [activeCollection.category || 'Mémoire'],
+      });
+
+      setUploadSuccess(`Le document « ${titleToUse} » a été ajouté avec succès à la collection !`);
+      setUploadedFile(null);
+      setUploadTitle('');
+      setUploadTags('');
+      setUploadPastedText('');
+      setTimeout(() => {
+        setShowDirectUploadModal(false);
+        setUploadSuccess('');
+      }, 900);
+    } catch (err: any) {
+      setUploadError(err.message || 'Une erreur est survenue lors de l\'importation du document.');
+    } finally {
+      setIsDecodingFile(false);
     }
   };
 
@@ -227,13 +316,27 @@ export const Collections: React.FC<CollectionsProps> = ({ onNavigate }) => {
               )}
             </div>
 
-            <button
-              onClick={() => setShowAddDocModal(true)}
-              className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[#3978D5] hover:bg-[#2F65B5] rounded-xl shadow-sm transition-all shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Associer un Document</span>
-            </button>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <button
+                onClick={() => {
+                  setUploadError('');
+                  setUploadSuccess('');
+                  setShowDirectUploadModal(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[#3978D5] hover:bg-[#2F65B5] rounded-xl shadow-sm transition-all"
+              >
+                <Upload className="w-4 h-4" />
+                <span>Déposer un document (sans analyse)</span>
+              </button>
+
+              <button
+                onClick={() => setShowAddDocModal(true)}
+                className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 rounded-xl transition-all"
+              >
+                <Plus className="w-4 h-4 text-[#3978D5]" />
+                <span>Lier un document existant</span>
+              </button>
+            </div>
           </div>
 
           {/* Metric Summary Strip */}
@@ -424,6 +527,182 @@ export const Collections: React.FC<CollectionsProps> = ({ onNavigate }) => {
                   Fermer
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Direct Upload Document into this Collection (Without Analysis) */}
+        {showDirectUploadModal && (
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-[#14243A] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#3978D5] flex items-center justify-center">
+                    <Upload className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold font-['Plus_Jakarta_Sans'] text-slate-900 dark:text-white">
+                      Déposer un document dans la collection
+                    </h3>
+                    <p className="text-[11px] text-slate-400">
+                      Collection : <span className="font-semibold text-slate-700 dark:text-slate-300">{activeCollection.title}</span>
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowDirectUploadModal(false)}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Informative notification */}
+              <div className="p-3 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 rounded-xl text-xs text-blue-900 dark:text-blue-300 flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-[#3978D5] shrink-0 mt-0.5" />
+                <p className="text-[11px] leading-relaxed">
+                  Ce document sera enregistré directement dans votre collection comme manuscrit ou corpus de référence. <strong>Aucune analyse ne sera lancée et aucun crédit ne sera débité</strong>. Il pourra servir ultérieurement de base de comparaison mixte lors de vos analyses.
+                </p>
+              </div>
+
+              {uploadError && (
+                <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-xl text-xs text-rose-700 dark:text-rose-300">
+                  {uploadError}
+                </div>
+              )}
+
+              {uploadSuccess && (
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 rounded-xl text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                  {uploadSuccess}
+                </div>
+              )}
+
+              <form onSubmit={handleExecuteDirectUpload} className="space-y-4">
+                {/* Mode Selector */}
+                <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setUploadMode('file')}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                      uploadMode === 'file'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    Fichier (PDF, DOCX, TXT)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUploadMode('paste')}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                      uploadMode === 'paste'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    Coller le texte
+                  </button>
+                </div>
+
+                {uploadMode === 'file' ? (
+                  <div className="space-y-2">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Fichier source à importer :
+                    </label>
+                    <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-[#3978D5] rounded-2xl p-6 text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-slate-900/40 relative">
+                      <input
+                        type="file"
+                        accept=".pdf,.docx,.txt,.md"
+                        onChange={handleDirectFileUpload}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      />
+                      <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                      {uploadedFile ? (
+                        <div className="text-xs">
+                          <p className="font-bold text-slate-900 dark:text-white">{uploadedFile.name}</p>
+                          <p className="text-[10px] text-slate-400 font-mono">
+                            {(uploadedFile.size / 1024).toFixed(1)} Ko · Fichier sélectionné
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-slate-500">
+                          <p className="font-semibold text-slate-700 dark:text-slate-300">
+                            Glissez-déposez votre document ici ou cliquez pour parcourir
+                          </p>
+                          <p className="text-[11px] text-slate-400 mt-1">
+                            PDF avec texte vectoriel, Word DOCX ou TXT (jusqu'à 64 Mo)
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Texte académique du document :
+                    </label>
+                    <textarea
+                      rows={6}
+                      value={uploadPastedText}
+                      onChange={(e) => setUploadPastedText(e.target.value)}
+                      placeholder="Collez ici les sections, mémoires ou chapitres de référence..."
+                      className="w-full text-xs p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-serif leading-relaxed focus:outline-none focus:ring-1 focus:ring-[#3978D5]"
+                    />
+                  </div>
+                )}
+
+                {/* Document Title */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Titre du document :
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadTitle}
+                    onChange={(e) => setUploadTitle(e.target.value)}
+                    placeholder="Ex: Thèse Génétique - Chapitre 2 Revue de Littérature"
+                    className="w-full text-xs px-3 py-2.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#3978D5]"
+                  />
+                </div>
+
+                {/* Tags */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Mots-clés / Tags (séparés par des virgules) :
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadTags}
+                    onChange={(e) => setUploadTags(e.target.value)}
+                    placeholder="Ex: Bioinformatique, Thèse UDs, GNN, Brouillon"
+                    className="w-full text-xs px-3 py-2.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#3978D5]"
+                  />
+                </div>
+
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowDirectUploadModal(false)}
+                    className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isDecodingFile}
+                    className="flex items-center gap-1.5 px-5 py-2 text-xs font-semibold text-white bg-[#3978D5] hover:bg-[#2F65B5] disabled:opacity-60 rounded-xl shadow-sm transition-all"
+                  >
+                    {isDecodingFile ? (
+                      <span>Extraction et décodage en cours...</span>
+                    ) : (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Enregistrer dans la collection</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

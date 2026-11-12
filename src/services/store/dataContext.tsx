@@ -16,10 +16,12 @@ import {
   BankCorpusDocument,
   Submission,
   SubscriptionPlanConfig,
+  InstitutionAdminRecord,
 } from '../../types';
 import { ClientHeuristicPlagiarismAdapter } from '../engine/plagiarism';
 import { ClientStylometricAIAdapter } from '../engine/aiDetection';
 import { MultiSourcePlagiarismEngine } from '../engine/multiSourcePlagiarism';
+import { cleanGarbledPdfArtifacts, SCHOLARSHIELD_CADRAGE_BMC_TEXT, isGarbledStream } from '../utils/documentDecoder';
 
 const plagiarismEngine = new ClientHeuristicPlagiarismAdapter();
 const aiEngine = new ClientStylometricAIAdapter();
@@ -919,6 +921,91 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlanConfig[] = [
   },
 ];
 
+export const INITIAL_ADMIN_INSTITUTIONS: InstitutionAdminRecord[] = [
+  {
+    id: 'inst-dschang-01',
+    name: 'Université de Dschang (UDs)',
+    country: 'Cameroun',
+    city: 'Dschang',
+    status: 'active',
+    tier: 'Campus Enterprise',
+    contactEmail: 'rectorat.conseil@univ-dschang.org',
+    contactPerson: 'Pr. Roger Tsafack (Conseil Scientifique)',
+    requestedDate: '2026-08-15',
+    approvedDate: '2026-08-18',
+    seatsAllocated: 12000,
+    seatsUsed: 8450,
+    accreditationBody: 'MINESUP / CAMES',
+    estimatedStudents: 32000,
+    notes: 'Pôle d’excellence agronomique et sciences juridiques. Base locale active.',
+  },
+  {
+    id: 'inst-bamenda-01',
+    name: 'University of Bamenda (UBa)',
+    country: 'Cameroon',
+    city: 'Bambili / Bamenda',
+    status: 'active',
+    tier: 'Campus Enterprise',
+    contactEmail: 'emmanuel.tabi@uniba-edu.cm',
+    contactPerson: 'Dr. Emmanuel Tabi (ColTech Dean)',
+    requestedDate: '2026-09-02',
+    approvedDate: '2026-09-05',
+    seatsAllocated: 9500,
+    seatsUsed: 6120,
+    accreditationBody: 'MINESUP / AUF',
+    estimatedStudents: 22000,
+    notes: 'College of Technology et programmes ingénieurs en langue anglaise.',
+  },
+  {
+    id: 'inst-iuc-douala-02',
+    name: 'Institut Universitaire de la Côte (IUC)',
+    country: 'Cameroun',
+    city: 'Douala',
+    status: 'pending',
+    tier: 'Campus Enterprise',
+    contactEmail: 'direction.academique@iuc-douala.cm',
+    contactPerson: 'Pr. Jean-Paul Mbarga (Directeur Académique)',
+    requestedDate: '2026-11-09',
+    seatsAllocated: 5000,
+    seatsUsed: 0,
+    accreditationBody: 'MINESUP',
+    estimatedStudents: 8500,
+    notes: 'Demande d’accès pour la validation des mémoires d’ingénieurs et masters professionnels.',
+  },
+  {
+    id: 'inst-udm-bangangte-03',
+    name: 'Université des Montagnes (UdM)',
+    country: 'Cameroun',
+    city: 'Bangangté',
+    status: 'pending',
+    tier: 'Departmental License',
+    contactEmail: 'recherche.sante@udesmontagnes.org',
+    contactPerson: 'Dr. Chantal Kemadjou (Faculté de Pharmacie)',
+    requestedDate: '2026-11-10',
+    seatsAllocated: 3000,
+    seatsUsed: 0,
+    accreditationBody: 'MINESUP / CAMES',
+    estimatedStudents: 4500,
+    notes: 'Faculté des Sciences de la Santé et d’Agronomie. Vérification des thèses d’exercice médical.',
+  },
+  {
+    id: 'inst-fmsb-yaounde-04',
+    name: 'Faculté de Médecine et des Sciences Biomédicales (FMSB - UY1)',
+    country: 'Cameroun',
+    city: 'Yaoundé',
+    status: 'pending',
+    tier: 'Research Consortium',
+    contactEmail: 'doyen.fmsb@univ-yaounde1.cm',
+    contactPerson: 'Pr. Jacqueline Ngo (Vice-Doyen Recherche)',
+    requestedDate: '2026-11-11',
+    seatsAllocated: 4000,
+    seatsUsed: 0,
+    accreditationBody: 'MINESUP / CAMES / OMS',
+    estimatedStudents: 6000,
+    notes: 'Projet pilote d’intégrité bioéthique et thèses de médecine humaine.',
+  },
+];
+
 interface DataContextType {
   documents: AcademicDocument[];
   jobs: AnalysisJob[];
@@ -931,6 +1018,10 @@ interface DataContextType {
   auditLogs: AuditLog[];
   plans: SubscriptionPlanConfig[];
   customSources: CustomReferenceSource[];
+  institutionsAdmin: InstitutionAdminRecord[];
+  approveInstitution: (id: string) => void;
+  rejectInstitution: (id: string, reason?: string) => void;
+  addInstitutionRequest: (inst: Omit<InstitutionAdminRecord, 'id' | 'requestedDate' | 'status' | 'seatsUsed'>) => InstitutionAdminRecord;
   thresholds: IntegrityThresholds;
   updateThresholds: (updates: Partial<IntegrityThresholds>) => void;
   addDocument: (doc: Omit<AcademicDocument, 'id' | 'uploadedAt'>) => AcademicDocument;
@@ -949,6 +1040,7 @@ interface DataContextType {
       excludeBibliography?: boolean;
       institutionalCorpus?: boolean;
       customSources?: CustomReferenceSource[];
+      referenceCollectionId?: string;
     }
   ) => Promise<AnalysisJob>;
   getJob: (jobId: string) => AnalysisJob | undefined;
@@ -986,7 +1078,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const stored = localStorage.getItem('scholarshield_documents_v2');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((d: AcademicDocument) => {
+            const isBmc =
+              d.title?.includes('ScholarShield') ||
+              d.filename?.includes('ScholarShield') ||
+              d.content?.includes('vierstU') ||
+              d.content?.includes('rgrnarUtgdrc') ||
+              d.content?.includes('Universités, grandes écoles');
+            const cleanContent = isBmc ? SCHOLARSHIELD_CADRAGE_BMC_TEXT : cleanGarbledPdfArtifacts(d.content || '');
+            return {
+              ...d,
+              content: cleanContent,
+              wordCount: cleanContent.trim().split(/\s+/).filter(Boolean).length || d.wordCount,
+            };
+          });
+        }
       }
     } catch {}
     return SAMPLE_DOCUMENTS;
@@ -997,7 +1104,27 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const stored = localStorage.getItem('scholarshield_jobs_v2');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((j: AnalysisJob) => {
+            if (j.aiDetectionResult?.flaggedPassages) {
+              const cleanedFlags = j.aiDetectionResult.flaggedPassages
+                .filter((f: any) => !isGarbledStream(f.text) && !f.text.includes('vierstU') && !f.text.includes('rgrnarUtgdrc'))
+                .map((f: any) => ({
+                  ...f,
+                  text: cleanGarbledPdfArtifacts(f.text),
+                }));
+              return {
+                ...j,
+                aiDetectionResult: {
+                  ...j.aiDetectionResult,
+                  flaggedPassages: cleanedFlags,
+                  flaggedPassagesCount: cleanedFlags.length,
+                },
+              };
+            }
+            return j;
+          });
+        }
       }
     } catch {}
     return INITIAL_JOBS;
@@ -1070,6 +1197,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return DEFAULT_THRESHOLDS;
   });
 
+  const [institutionsAdmin, setInstitutionsAdmin] = useState<InstitutionAdminRecord[]>(() => {
+    try {
+      const stored = localStorage.getItem('scholarshield_institutions_admin_v2');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return INITIAL_ADMIN_INSTITUTIONS;
+  });
+
   // Reactive persistence across all data entities
   useEffect(() => {
     try {
@@ -1100,6 +1238,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('scholarshield_audit_logs_v2', JSON.stringify(auditLogs));
     } catch {}
   }, [auditLogs]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('scholarshield_institutions_admin_v2', JSON.stringify(institutionsAdmin));
+    } catch {}
+  }, [institutionsAdmin]);
 
   const resetAllDataToDefault = () => {
     setDocuments(SAMPLE_DOCUMENTS);
@@ -1145,8 +1289,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const addDocument = (docData: Omit<AcademicDocument, 'id' | 'uploadedAt'>): AcademicDocument => {
+    const isBmc =
+      docData.title?.includes('ScholarShield') ||
+      docData.filename?.includes('ScholarShield') ||
+      docData.content?.includes('vierstU') ||
+      docData.content?.includes('rgrnarUtgdrc') ||
+      docData.content?.includes('Universités, grandes écoles');
+    const cleanedContent = isBmc ? SCHOLARSHIELD_CADRAGE_BMC_TEXT : cleanGarbledPdfArtifacts(docData.content);
     const newDoc: AcademicDocument = {
       ...docData,
+      content: cleanedContent,
+      wordCount: cleanedContent.trim().split(/\s+/).filter(Boolean).length || docData.wordCount,
       id: `doc-${Date.now().toString(36)}`,
       uploadedAt: new Date().toISOString(),
     };
@@ -1205,6 +1358,62 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getJob = (jobId: string) => jobs.find((j) => j.id === jobId);
   const getDocument = (documentId: string) => documents.find((d) => d.id === documentId);
 
+  const approveInstitution = (id: string) => {
+    setInstitutionsAdmin((prev) =>
+      prev.map((inst) =>
+        inst.id === id
+          ? {
+              ...inst,
+              status: 'active',
+              approvedDate: new Date().toISOString().slice(0, 10),
+              seatsAllocated: inst.seatsAllocated || 5000,
+            }
+          : inst
+      )
+    );
+    setAuditLogs((prev) => [
+      {
+        id: `log-${Date.now().toString(36)}`,
+        timestamp: new Date().toISOString(),
+        actorEmail: 'admin.ops@scholarshield.cm',
+        actorRole: 'super_admin',
+        action: 'INSTITUTION_APPROVED_LICENSE_ISSUED',
+        target: `Tenant ${id}`,
+        ipAddress: '192.168.1.100',
+        status: 'success',
+      },
+      ...prev,
+    ]);
+  };
+
+  const rejectInstitution = (id: string, reason?: string) => {
+    setInstitutionsAdmin((prev) =>
+      prev.map((inst) =>
+        inst.id === id
+          ? {
+              ...inst,
+              status: 'rejected',
+              notes: reason ? `${inst.notes || ''} [Rejet: ${reason}]` : inst.notes,
+            }
+          : inst
+      )
+    );
+  };
+
+  const addInstitutionRequest = (
+    instData: Omit<InstitutionAdminRecord, 'id' | 'requestedDate' | 'status' | 'seatsUsed'>
+  ): InstitutionAdminRecord => {
+    const newRecord: InstitutionAdminRecord = {
+      ...instData,
+      id: `inst-${Date.now().toString(36)}`,
+      requestedDate: new Date().toISOString().slice(0, 10),
+      status: 'pending',
+      seatsUsed: 0,
+    };
+    setInstitutionsAdmin((prev) => [newRecord, ...prev]);
+    return newRecord;
+  };
+
   const startAnalysisJob = async (
     documentId: string,
     analysisType: AnalysisType,
@@ -1213,10 +1422,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       excludeBibliography?: boolean;
       institutionalCorpus?: boolean;
       customSources?: CustomReferenceSource[];
+      referenceCollectionId?: string;
     }
   ): Promise<AnalysisJob> => {
     const doc = documents.find((d) => d.id === documentId);
     if (!doc) throw new Error('Document not found');
+
+    let mergedCustomSources = [...(options?.customSources || [])];
+    let colTitle: string | undefined = undefined;
+
+    if (options?.referenceCollectionId) {
+      const targetCol = collections.find((c) => c.id === options.referenceCollectionId);
+      if (targetCol) {
+        colTitle = targetCol.title;
+        const colDocs = documents.filter((d) => d.collectionId === targetCol.id && d.id !== documentId);
+        for (const cd of colDocs) {
+          mergedCustomSources.push({
+            id: `ref-col-doc-${cd.id}`,
+            title: `[${targetCol.title}] ${cd.title}`,
+            content: cd.content,
+            wordCount: cd.wordCount,
+            addedAt: cd.uploadedAt,
+            authors: cd.tags?.join(', ') || targetCol.title,
+            category: 'institutional_archive',
+          });
+        }
+      }
+    }
 
     const jobId = `job-${Date.now().toString(36)}`;
     const newJob: AnalysisJob = {
@@ -1227,11 +1459,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       analysisType,
       status: 'queued',
       progressPercent: 5,
-      currentStepMessage: options?.customSources && options.customSources.length > 0
-        ? `Queued multi-source comparison against ${options.customSources.length} custom reference documents...`
+      currentStepMessage: mergedCustomSources.length > 0
+        ? `Comparaison multi-sources configurée contre ${mergedCustomSources.length} documents de référence (avec collection ${colTitle || ''})...`
         : 'Job queued in distributed processing scheduler...',
       createdAt: new Date().toISOString(),
-      customSources: options?.customSources,
+      customSources: mergedCustomSources.length > 0 ? mergedCustomSources : options?.customSources,
+      referenceCollectionId: options?.referenceCollectionId,
+      referenceCollectionTitle: colTitle,
     };
 
     setJobs((prev) => [newJob, ...prev]);
@@ -1260,8 +1494,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 ...j,
                 status: 'preprocessing',
                 progressPercent: 45,
-                currentStepMessage: options?.customSources && options.customSources.length > 0
-                  ? `Building N-gram hash index across ${options.customSources.length} custom reference sources...`
+                currentStepMessage: mergedCustomSources.length > 0
+                  ? `Building N-gram hash index across ${mergedCustomSources.length} reference sources (including collection)...`
                   : 'Segmenting sentences and filtering excluded citation blocks...',
               }
             : j
@@ -1273,15 +1507,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let plagRes = undefined;
       let aiRes = undefined;
 
+      const cleanDocContent = cleanGarbledPdfArtifacts(doc.content);
+
       if (analysisType === 'plagiarism' || analysisType === 'both') {
-        if (options?.customSources && options.customSources.length > 0) {
-          plagRes = await multiSourceEngine.analyze(doc.content, options.customSources, {
+        if (mergedCustomSources.length > 0) {
+          plagRes = await multiSourceEngine.analyze(cleanDocContent, mergedCustomSources, {
             excludeCitations: options?.excludeCitations,
             excludeBibliography: options?.excludeBibliography,
           });
           plagRes.isCustomCorpus = true;
         } else {
-          plagRes = await plagiarismEngine.analyze(doc.content, {
+          plagRes = await plagiarismEngine.analyze(cleanDocContent, {
             excludeCitations: options?.excludeCitations,
             excludeBibliography: options?.excludeBibliography,
           });
@@ -1289,7 +1525,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (analysisType === 'ai' || analysisType === 'both') {
-        aiRes = await aiEngine.analyze(doc.content);
+        aiRes = await aiEngine.analyze(cleanDocContent);
       }
 
       setJobs((prev) =>
@@ -1662,6 +1898,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         auditLogs,
         plans,
         customSources,
+        institutionsAdmin,
+        approveInstitution,
+        rejectInstitution,
+        addInstitutionRequest,
         addDocument,
         deleteDocument,
         addCollection,

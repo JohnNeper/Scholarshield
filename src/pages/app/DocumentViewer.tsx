@@ -13,6 +13,8 @@ import {
   Share2,
 } from 'lucide-react';
 
+import { cleanGarbledPdfArtifacts } from '../../services/utils/documentDecoder';
+
 interface DocumentViewerProps {
   documentId: string;
   onNavigate: (path: string) => void;
@@ -40,7 +42,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ documentId, onNa
     );
   }
 
-  const paragraphs = doc.content.split('\n\n');
+  const cleanText = cleanGarbledPdfArtifacts(doc.content || '');
+  const paragraphs = cleanText.split('\n\n');
   const totalPages = Math.max(1, Math.ceil(paragraphs.length / 3));
 
   return (

@@ -151,7 +151,27 @@ export interface AnalysisJob {
   plagiarismResult?: PlagiarismResult;
   aiDetectionResult?: AIDetectionResult;
   customSources?: CustomReferenceSource[];
+  referenceCollectionId?: string;
+  referenceCollectionTitle?: string;
   error?: string;
+}
+
+export interface InstitutionAdminRecord {
+  id: string;
+  name: string;
+  country: string;
+  city: string;
+  status: 'pending' | 'active' | 'rejected';
+  tier: 'Campus Enterprise' | 'Departmental License' | 'Research Consortium' | string;
+  contactEmail: string;
+  contactPerson: string;
+  requestedDate: string;
+  approvedDate?: string;
+  seatsAllocated: number;
+  seatsUsed: number;
+  accreditationBody?: string;
+  estimatedStudents?: number;
+  notes?: string;
 }
 
 export interface Department {

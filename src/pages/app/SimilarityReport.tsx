@@ -14,6 +14,7 @@ import {
   Download,
 } from 'lucide-react';
 import { MatchedPassage, SourceReference } from '../../types';
+import { cleanGarbledPdfArtifacts, isGarbledStream } from '../../services/utils/documentDecoder';
 
 interface SimilarityReportProps {
   jobId: string;
@@ -24,6 +25,7 @@ export const SimilarityReport: React.FC<SimilarityReportProps> = ({ jobId, onNav
   const { getJob, getDocument, thresholds } = useData();
   const job = getJob(jobId);
   const doc = job ? getDocument(job.documentId) : null;
+  const displayContent = cleanGarbledPdfArtifacts(doc?.content || '');
 
   const [selectedPassageId, setSelectedPassageId] = useState<string | null>(
     job?.plagiarismResult?.matchedPassages[0]?.id || null
@@ -208,7 +210,7 @@ export const SimilarityReport: React.FC<SimilarityReportProps> = ({ jobId, onNav
               style={{ fontSize: `${(zoomLevel / 100) * 14}px` }}
               className="max-w-2xl mx-auto space-y-4"
             >
-              {doc?.content.split(/\r?\n+/).filter(Boolean).map((paragraph, pIdx) => {
+              {displayContent.split(/\r?\n+/).filter(Boolean).map((paragraph, pIdx) => {
                 // Find all matched passages that appear in this paragraph
                 const matchesInPara = matchedPassages.filter((mp) => {
                   if (selectedSourceId && mp.sourceId !== selectedSourceId) {
